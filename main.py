@@ -1,4 +1,4 @@
-print("🛠 Restarting...")
+print("🔁 Running the correct main.py file ✅")
 
 import os
 import time
