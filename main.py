@@ -3,7 +3,6 @@ import time
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 
 # Log env variables for debugging
@@ -16,7 +15,6 @@ print("SMTP_PORT:", os.getenv("SMTP_PORT"))
 print("EMAIL_SUBJECT:", os.getenv("EMAIL_SUBJECT"))
 
 # Load credentials from .env
-load_dotenv()
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
