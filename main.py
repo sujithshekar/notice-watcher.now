@@ -6,6 +6,15 @@ from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 
+# Log env variables for debugging
+print("🚨 Debugging Environment Variables:")
+print("EMAIL_SENDER:", os.getenv("EMAIL_SENDER"))
+print("EMAIL_PASSWORD exists:", os.getenv("EMAIL_PASSWORD") is not None)
+print("EMAIL_RECEIVER:", os.getenv("EMAIL_RECEIVER"))
+print("SMTP_SERVER:", os.getenv("SMTP_SERVER"))
+print("SMTP_PORT:", os.getenv("SMTP_PORT"))
+print("EMAIL_SUBJECT:", os.getenv("EMAIL_SUBJECT"))
+
 # Load credentials from .env
 load_dotenv()
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
