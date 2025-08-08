@@ -1,12 +1,6 @@
 {
   "build": {
-    "commands": [
-      "pip install -r requirements.txt",
-      "playwright install --with-deps"
-    ]
-  },
-  "start": {
-    "cmd": "./start.sh"
+    "dockerfile": "Dockerfile"
   }
 }
 
