@@ -5,6 +5,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from playwright.sync_api import sync_playwright
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # Log env variables for debugging
 print("🚨 Debugging Environment Variables:")
 print("EMAIL_SENDER:", os.getenv("EMAIL_SENDER"))
@@ -15,12 +18,12 @@ print("SMTP_PORT:", os.getenv("SMTP_PORT"))
 print("EMAIL_SUBJECT:", os.getenv("EMAIL_SUBJECT"))
 
 # Load credentials from .env
-EMAIL_SENDER = os.environ.get("EMAIL_SENDER")
-EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
-EMAIL_RECEIVER = os.environ.get("EMAIL_RECEIVER")
-EMAIL_SUBJECT = os.environ.get("EMAIL_SUBJECT", "New NBEMS Notice Alert")
-SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
-SMTP_PORT = int(os.environ.get("SMTP_PORT", 587))
+EMAIL_SENDER = os.getenv("EMAIL_SENDER")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
+EMAIL_SUBJECT = os.getenv("EMAIL_SUBJECT", "New NBEMS Notice Alert")
+SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
 
 
 def send_email(subject, body):
