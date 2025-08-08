@@ -1,3 +1,5 @@
+print("🛠 Restarting...")
+
 import os
 import time
 import smtplib
