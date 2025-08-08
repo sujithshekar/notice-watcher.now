@@ -1,0 +1,13 @@
+[phases.setup]
+nixPkgs = [
+  "playwright-test", 
+  "chromium",
+  "ffmpeg",
+  "libX11",
+  "glib", 
+  "gtk3",
+  "nss",
+  "freetype",
+  "pango"
+]
+
