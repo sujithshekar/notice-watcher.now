@@ -7,9 +7,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from playwright.sync_api import sync_playwright
 
-from dotenv import load_dotenv
-load_dotenv()
-
 # Log env variables for debugging
 print("🚨 Debugging Environment Variables:")
 print("EMAIL_SENDER:", os.getenv("EMAIL_SENDER"))
