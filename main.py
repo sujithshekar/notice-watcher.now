@@ -6,9 +6,9 @@ from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 
-# Only load .env locally
+# ✅ Only load .env locally to avoid overwriting Railway's env vars
 if os.path.exists(".env"):
-load_dotenv()
+    load_dotenv()
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
