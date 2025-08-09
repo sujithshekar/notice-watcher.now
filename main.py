@@ -1,88 +1,87 @@
-from playwright.sync_api import sync_playwright
-import time
 import os
+import time
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
+from playwright.sync_api import sync_playwright
 
-print("🔁 Running the correct main.py file ✅")
-
-# Load environment variables from .env
+# Load credentials from .env
 load_dotenv()
+EMAIL_SENDER = os.getenv("EMAIL_SENDER")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
+EMAIL_SUBJECT = os.getenv("EMAIL_SUBJECT", "New NBEMS Notice Alert")
+SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
 
-# Debug environment variables
-print("🚨 Debugging Environment Variables (from .env):")
-print(f"EMAIL_SENDER: {os.getenv('EMAIL_SENDER')}")
-print(f"EMAIL_PASSWORD exists: {'EMAIL_PASSWORD' in os.environ}")
-print(f"EMAIL_RECEIVER: {os.getenv('EMAIL_RECEIVER')}")
-print(f"SMTP_SERVER: {os.getenv('SMTP_SERVER')}")
-print(f"SMTP_PORT: {os.getenv('SMTP_PORT')}")
-print(f"EMAIL_SUBJECT: {os.getenv('EMAIL_SUBJECT')}")
 
-# Email function
 def send_email(subject, body):
-    sender = os.getenv("EMAIL_SENDER")
-    receiver = os.getenv("EMAIL_RECEIVER")
-    password = os.getenv("EMAIL_PASSWORD")
-    smtp_server = os.getenv("SMTP_SERVER")
-    smtp_port = int(os.getenv("SMTP_PORT"))
-
-    msg = MIMEText(body)
+    msg = MIMEMultipart()
+    msg["From"] = EMAIL_SENDER
+    msg["To"] = EMAIL_RECEIVER
     msg["Subject"] = subject
-    msg["From"] = sender
-    msg["To"] = receiver
+    msg.attach(MIMEText(body, "plain"))
 
     try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(sender, password)
-            server.sendmail(sender, receiver, msg.as_string())
-        print("✅ Email sent successfully.")
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+        server.send_message(msg)
+        server.quit()
+        print("📧 Email sent.")
     except Exception as e:
         print(f"❌ Failed to send email: {e}")
 
-# Function to get latest notice text
-def get_latest_notice_text(page):
-    try:
-        page.goto("https://natboard.edu.in/allnotice.php", timeout=60000)
-        page.wait_for_selector("a.view-notice", timeout=10000)
-        notice = page.locator("a.view-notice").first.inner_text()
-        return notice.strip()
-    except Exception as e:
-        print(f"❌ Error fetching notice: {e}")
-        return None
 
-# Main loop
-def main():
-    last_notice = None
+def get_latest_notice():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(user_agent=(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/115.0.0.0 Safari/537.36"
-        ))
+        browser = p.chromium.launch(headless=True)  # Headless mode ON
+        context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
         page = context.new_page()
+        print("🔍 Checking for updates...")
+        try:
+            page.goto("https://natboard.edu.in/allnotice.php", timeout=60000)
+            page.wait_for_selector("a[href^='viewNotice.php']", timeout=20000)
+            first_notice = page.locator("a[href^='viewNotice.php']").first
+            text = first_notice.inner_text()
+            print(f"🔔 Latest Notice: {text}")
+            return text.strip()
+        except Exception as e:
+            print(f"⚠️ Error while checking notices: {e}")
+            return None
+        finally:
+            browser.close()
 
-        while True:
-            print("🔍 Checking for updates...")
-            current_notice = get_latest_notice_text(page)
 
-            if current_notice:
-                print(f"🔔 Latest Notice: {current_notice}")
-                if current_notice != last_notice:
-                    print("🆕 New notice! Sending email...")
-                    send_email(
-                        os.getenv("EMAIL_SUBJECT", "New Notice Alert"),
-                        current_notice
-                    )
-                    last_notice = current_notice
-                else:
-                    print("ℹ️ No new notice.")
+def read_last_notice():
+    if os.path.exists("last_notice.txt"):
+        with open("last_notice.txt", "r") as f:
+            return f.read().strip()
+    return None
+
+
+def save_latest_notice(notice):
+    with open("last_notice.txt", "w") as f:
+        f.write(notice)
+
+
+def main():
+    print("🔍 Starting notice watcher...")
+    while True:
+        latest_notice = get_latest_notice()
+        if latest_notice is None:
+            print("⚠️ Could not fetch latest notice.")
+        else:
+            last_notice = read_last_notice()
+            if latest_notice != last_notice:
+                print("🆕 New notice! Sending email...")
+                send_email(EMAIL_SUBJECT, latest_notice)
+                save_latest_notice(latest_notice)
             else:
-                print("⚠️ Failed to fetch notice.")
+                print("ℹ️ No new notice.")
+        time.sleep(30)  # Check every 30 seconds
 
-            time.sleep(30)  # Check every 30 seconds
 
 if __name__ == "__main__":
     main()
