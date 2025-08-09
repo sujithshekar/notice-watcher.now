@@ -6,7 +6,8 @@ from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 
-# Load credentials from .env
+# Only load .env locally
+if os.path.exists(".env"):
 load_dotenv()
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
